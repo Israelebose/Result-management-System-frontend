@@ -21,7 +21,7 @@ const addSchema = Yup.object({
 
 const CourseManagement = () => {
   const api = useApi();
-  const { setErrors, setSuccess } = useDetails();
+  const { setErrors, setSuccess, userData } = useDetails();
 
   // Local state
   const [courses, setCourses] = useState([]);

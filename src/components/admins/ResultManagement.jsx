@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { useDetails } from "../context/ContextProvider";
 
 export const ResultManagement = () => {
+  const {userData} = useDetails()
   useEffect(() => {
     if (!userData.role || userData.role !== "admin") {
       setErrors("Session expired. Please log in again.");

@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useDetails } from "./components/context/ContextProvider";
 
 const NotFound = () => {
+  const {userData} = useDetails()
   useEffect(()=>{
     if (!userData.role) {
       setErrors("Session expired. Please log in again.");
