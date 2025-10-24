@@ -29,7 +29,7 @@ import  CaResultManagement from "./components/course_adviser/CaResultManagement"
 import { useDetails } from "./components/context/ContextProvider";
 
 import CaStudentManagement from "./components/course_adviser/CaStudentManagement";
-import CourseReg from "./components/student/courseReg";
+import CourseReg from "./components/student/CourseReg";
 import RegisteredCourses from "./components/student/RegisteredCourses";
 import NotFound from "./NotFound";
 
