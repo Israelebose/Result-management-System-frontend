@@ -1,0 +1,298 @@
+
+
+import React, { useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+const CaResultManagement = () => {
+  const [selectedSection, setSelectedSection] = useState("2024/2025");
+  const [selectedSemester, setSelectedSemester] = useState("both");
+
+  /** ---------- Courses for each session ---------- */
+  const coursesBySession = {
+    "2024/2025": {
+      first: ["CED400", "CPE433", "CPE451", "CPE481"],
+      second: ["CPE402", "CPE404", "CPE406"],
+    },
+    "2023/2024": {
+      first: ["CED300", "CPE311", "CPE351", "CPE375"],
+      second: ["CPE302", "CPE304", "CPE306"],
+    },
+    "2022/2023": {
+      first: ["CED200", "CPE211", "CPE251"],
+      second: ["CPE202", "CPE204", "CPE206"],
+    },
+  };
+
+  /** ---------- Demo students with multiple years ---------- */
+  const [students] = useState([
+    // 2024/2025
+    {
+      session: "2024/2025",
+      sn: 1,
+      matricNo: "ENG1905018",
+      firstSemGrades: { CED400: "B", CPE433: "A", CPE451: "C", CPE481: "F" },
+      secondSemGrades: { CPE402: "A", CPE404: "B", CPE406: "C" },
+      tcf1: 30, tcp1: 21, tcr1: 22,
+      cpe499: "A", tcf2: 7, tcp2: 28, tcr2: 35,
+    },
+    {
+      session: "2024/2025",
+      sn: 2,
+      matricNo: "ENG1905020",
+      firstSemGrades: { CED400: "A", CPE433: "C", CPE451: "D", CPE481: "B" },
+      secondSemGrades: { CPE402: "C", CPE404: "F", CPE406: "B" },
+      tcf1: 32, tcp1: 25, tcr1: 28,
+      cpe499: "B", tcf2: 10, tcp2: 22, tcr2: 30,
+    },
+    {
+      session: "2024/2025",
+      sn: 3,
+      matricNo: "ENG1905021",
+      firstSemGrades: { CED400: "B", CPE433: "B", CPE451: "A", CPE481: "C" },
+      secondSemGrades: { CPE402: "A", CPE404: "A", CPE406: "B" },
+      tcf1: 34, tcp1: 29, tcr1: 30,
+      cpe499: "A", tcf2: 12, tcp2: 30, tcr2: 38,
+    },
+
+    // 2023/2024
+    {
+      session: "2023/2024",
+      sn: 1,
+      matricNo: "ENG1905018",
+      firstSemGrades: { CED300: "F", CPE311: "B", CPE351: "C", CPE375: "D" },
+      secondSemGrades: { CPE302: "C", CPE304: "F", CPE306: "B" },
+      tcf1: 28, tcp1: 18, tcr1: 20,
+      cpe499: "B", tcf2: 6, tcp2: 25, tcr2: 30,
+    },
+    {
+      session: "2023/2024",
+      sn: 2,
+      matricNo: "ENG1905020",
+      firstSemGrades: { CED300: "C", CPE311: "B", CPE351: "F", CPE375: "B" },
+      secondSemGrades: { CPE302: "B", CPE304: "C", CPE306: "A" },
+      tcf1: 29, tcp1: 20, tcr1: 23,
+      cpe499: "C", tcf2: 7, tcp2: 20, tcr2: 29,
+    },
+    {
+      session: "2023/2024",
+      sn: 3,
+      matricNo: "ENG1905021",
+      firstSemGrades: { CED300: "B", CPE311: "B", CPE351: "C", CPE375: "A" },
+      secondSemGrades: { CPE302: "C", CPE304: "C", CPE306: "B" },
+      tcf1: 30, tcp1: 24, tcr1: 25,
+      cpe499: "B", tcf2: 9, tcp2: 28, tcr2: 32,
+    },
+  ]);
+
+  /** ---------- Derive repeated & carried courses ---------- */
+  const getRepeated = (student) => {
+    let repeatCourses = [];
+    let repeatGrades = [];
+
+    Object.entries(student.firstSemGrades || {}).forEach(([c, g]) => {
+      if (g === "F") { repeatCourses.push(c); repeatGrades.push(g); }
+    });
+    Object.entries(student.secondSemGrades || {}).forEach(([c, g]) => {
+      if (g === "F") { repeatCourses.push(c); repeatGrades.push(g); }
+    });
+
+    return { repeatCourses: repeatCourses.join(", "), repeatGrades: repeatGrades.join(", ") };
+  };
+
+  /** ---------- CSV EXPORT ---------- */
+  const handleExportCSV = () => {
+    const { first, second } = coursesBySession[selectedSection] || { first: [], second: [] };
+
+    let headers = ["S/N", "Matric No", "Repeat Courses", "Repeat Grades"];
+    if (selectedSemester === "first" || selectedSemester === "both") headers = [...headers, ...first, "TCF(1st)", "TCP(1st)", "TCR(1st)"];
+    if (selectedSemester === "second" || selectedSemester === "both") headers = [...headers, ...second, "CPE499", "TCF(2nd)", "TCP(2nd)", "TCR(2nd)"];
+    headers.push("Carried Courses");
+
+    const rows = students
+      .filter((s) => s.session === selectedSection)
+      .map((s) => {
+        const repeats = getRepeated(s);
+        let row = [s.sn, s.matricNo, repeats.repeatCourses, repeats.repeatGrades];
+        if (selectedSemester === "first" || selectedSemester === "both")
+          row = [...row, ...first.map((c) => s.firstSemGrades?.[c] || ""), s.tcf1, s.tcp1, s.tcr1];
+        if (selectedSemester === "second" || selectedSemester === "both")
+          row = [...row, ...second.map((c) => s.secondSemGrades?.[c] || ""), s.cpe499, s.tcf2, s.tcp2, s.tcr2];
+        row.push(repeats.repeatCourses); // carried = failed
+        return row;
+      });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map((e) => e.join(",")).join("\n");
+    const link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = `results_${selectedSection}.csv`;
+    link.click();
+  };
+
+  /** ---------- PDF EXPORT ---------- */
+  const handleExportPDF = () => {
+    const doc = new jsPDF("l", "pt", "a4");
+    doc.setFontSize(12);
+    doc.text(`University of Benin - Examination Record Sheet (${selectedSection})`, 40, 30);
+
+    const { first, second } = coursesBySession[selectedSection] || { first: [], second: [] };
+
+    let headers = ["S/N", "Matric No", "Repeat Courses", "Repeat Grades"];
+    if (selectedSemester === "first" || selectedSemester === "both") headers = [...headers, ...first, "TCF(1st)", "TCP(1st)", "TCR(1st)"];
+    if (selectedSemester === "second" || selectedSemester === "both") headers = [...headers, ...second, "CPE499", "TCF(2nd)", "TCP(2nd)", "TCR(2nd)"];
+    headers.push("Carried Courses");
+
+    const data = students
+      .filter((s) => s.session === selectedSection)
+      .map((s) => {
+        const repeats = getRepeated(s);
+        let row = [s.sn, s.matricNo, repeats.repeatCourses, repeats.repeatGrades];
+        if (selectedSemester === "first" || selectedSemester === "both")
+          row = [...row, ...first.map((c) => s.firstSemGrades?.[c] || ""), s.tcf1, s.tcp1, s.tcr1];
+        if (selectedSemester === "second" || selectedSemester === "both")
+          row = [...row, ...second.map((c) => s.secondSemGrades?.[c] || ""), s.cpe499, s.tcf2, s.tcp2, s.tcr2];
+        row.push(repeats.repeatCourses);
+        return row;
+      });
+
+    autoTable(doc, {
+      head: [headers],
+      body: data,
+      startY: 50,
+      styles: { fontSize: 8, halign: "center" },
+      headStyles: { fillColor: [41, 128, 185] },
+    });
+
+    doc.save(`results_${selectedSection}.pdf`);
+  };
+
+  /** ---------- PRINT ---------- */
+  const handlePrint = () => {
+    const sections = document.querySelectorAll(".print-section");
+    let combinedContent = "";
+    sections.forEach((s) => { combinedContent += s.innerHTML + "<br/><br/>"; });
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = combinedContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
+  };
+
+  const { first: firstSemCourses = [], second: secondSemCourses = [] } = coursesBySession[selectedSection] || {};
+
+  const handlePublish = async () => { 
+    try {
+      const res = await api.post('/publish/results', {
+        session: selectedSection,
+        semester: selectedSemester,
+      });
+      alert(res.data.message || 'Results published successfully');
+    } catch (error) {
+      console.log({error:error});
+      
+    }
+  }
+
+
+  return (
+    <div className="min-h-screen  bg-gray-50 dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-100">
+      {/* Header */}
+      <div className="print-section mb-6 text-center">
+        <h1 className="text-2xl font-bold">COMPUTER ENGINEERING FACULTY OF ENGINEERING</h1>
+        <p>UNIVERSITY OF BENIN EXAMINATION RECORD SHEET</p>
+        <p className="font-semibold">SESSION: {selectedSection} Academic Session</p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex justify-between mb-4 print:hidden">
+        <div className="flex gap-4">
+          <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} className="border rounded-md px-3 py-2">
+            <option value="2024/2025">2024/2025</option>
+            <option value="2023/2024">2023/2024</option>
+            <option value="2022/2023">2022/2023</option>
+          </select>
+
+          <select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)} className="border rounded-md px-3 py-2">
+            <option value="first">First Semester</option>
+            <option value="second">Second Semester</option>
+            <option value="both">Both Semesters</option>
+          </select>
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={handlePublish} className="px-4 py-2 bg-orange-500 hover:bg-yellow-600 text-white rounded-md">Publish Result</button>
+          <button onClick={handlePrint} className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md">Print Sheet</button>
+          <button onClick={handleExportPDF} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">Download PDF</button>
+          <button onClick={handleExportCSV} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Export CSV</button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="print-section overflow-x-auto bg-white dark:bg-gray-800 p-4 rounded-lg">
+        <table className="w-full border-collapse border text-sm">
+          <thead>
+            <tr className="bg-gray-200 dark:bg-gray-700 text-center">
+              <th rowSpan="2" className="border px-2 py-1">S/N</th>
+              <th rowSpan="2" className="border px-2 py-1">Matric No</th>
+              <th rowSpan="2" className="border px-2 py-1">Repeat Courses</th>
+              <th rowSpan="2" className="border px-2 py-1">Repeat Grades</th>
+              {selectedSemester !== "second" && (
+                <th colSpan={firstSemCourses.length + 3} className="border px-2 py-1">First Semester Courses</th>
+              )}
+              {selectedSemester !== "first" && (
+                <th colSpan={secondSemCourses.length + 4} className="border px-2 py-1">Second Semester Courses</th>
+              )}
+              <th rowSpan="2" className="border px-2 py-1">Carried Courses</th>
+            </tr>
+            <tr className="bg-gray-100 dark:bg-gray-600 text-center">
+              {selectedSemester !== "second" &&
+                [...firstSemCourses, "TCF(1st)", "TCP(1st)", "TCR(1st)"].map((c) => (
+                  <th key={c} className="border px-2 py-1">{c}</th>
+                ))}
+              {selectedSemester !== "first" &&
+                [...secondSemCourses, "CPE499", "TCF(2nd)", "TCP(2nd)", "TCR(2nd)"].map((c) => (
+                  <th key={c} className="border px-2 py-1">{c}</th>
+                ))}
+            </tr>
+          </thead>
+          <tbody>
+            {students.filter((s) => s.session === selectedSection).map((s) => {
+              const repeats = getRepeated(s);
+              return (
+                <tr key={s.matricNo + s.session} className="text-center hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="border px-2 py-1">{s.sn}</td>
+                  <td className="border px-2 py-1">{s.matricNo}</td>
+                  <td className="border px-2 py-1">{repeats.repeatCourses}</td>
+                  <td className="border px-2 py-1">{repeats.repeatGrades}</td>
+                  {selectedSemester !== "second" &&
+                    [...firstSemCourses, "tcf1", "tcp1", "tcr1"].map((c) => (
+                      <td key={c} className="border px-2 py-1">{s.firstSemGrades?.[c] || s[c] || ""}</td>
+                    ))}
+                  {selectedSemester !== "first" &&
+                    [...secondSemCourses, "cpe499", "tcf2", "tcp2", "tcr2"].map((c) => (
+                      <td key={c} className="border px-2 py-1">{s.secondSemGrades?.[c] || s[c] || ""}</td>
+                    ))}
+                  <td className="border px-2 py-1">{repeats.repeatCourses}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Signature */}
+      <div className="print-section mt-10 flex justify-between print:block">
+        <div>
+          <p className="font-semibold text-sm">COURSE ADVISER SIGN/DATE</p>
+          <div className="border-b w-64 h-10"></div>
+        </div>
+        <div className="text-right text-xs text-gray-600 dark:text-gray-400">
+          <p>Prepared by: i.o omoifo</p>
+          <p>Date: {new Date().toLocaleDateString()}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CaResultManagement;

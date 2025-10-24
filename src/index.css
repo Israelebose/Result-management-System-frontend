@@ -1,0 +1,95 @@
+@import "tailwindcss";
+/* @plugin "daisyui";   */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+    font-family: calibril;
+    src: url('./assets/font/nunitoSans/NunitoSans-Regular.ttf');
+}
+
+*{
+    font-family: calibril;   
+}
+
+/* index.css (add this below your Tailwind directives) */
+
+/* Hide any element with these classes during print */
+@media print {
+  .no-print, .sidebar, .topbar, .nav, .hide-on-print {
+    display: none !important;
+  }
+
+  /* Make the sheet use full page width and landscape-friendly */
+  .printable-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Reduce font for printing tables */
+  table { font-size: 10px; }
+}
+
+
+@theme{
+    --color-primary_bg : #f3f4f6;
+    --color-secondary_bg : #ffffff;
+    --color-textColor1 : #1e2939;
+    --color-primary-blue: #2b64e3;
+    --color-primary-blue-hover: #1e4bb8;
+    
+}
+
+@layer base{
+    .dark{
+        --color-primary_bg : #041224;
+        --color-secondary_bg :#05172f ;
+        --color-textColor1 :  #f3f4f6;
+        
+    }
+}
+
+.circle {
+    border-radius: 100%;
+}
+
+.btn{
+    @apply px-4 py-2 text-white rounded transition-colors;
+}
+[data-title] {
+    position: relative;
+    cursor: pointer;
+}
+
+/* Tooltip styling */
+[data-title]::after {
+    content: attr(data-title);
+    position: absolute;
+    bottom: 100%; /* Position above the element */
+    left: 20%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    
+    transition: opacity 0.2s ease-in-out;
+}
+/* Show the tooltip on hover */
+[data-title]:hover::after {
+    opacity: 1;
+}
+
+.mobile_sidebar_parent{
+    @apply  max-sm:fixed max-sm:p-3 max-sm:left-0 max-sm:top-0 max-sm:w-full;
+}
+
+.monbile_sidebar_com_1{
+    @apply max-sm:w-full ;
+}
