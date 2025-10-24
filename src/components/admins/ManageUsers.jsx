@@ -159,9 +159,9 @@ const ManageUsers = () => {
     }
 
     try {
-      await api.delete(`/auth/delete/${userRole}/${roleId}`);
+      const req = await api.delete(`/auth/delete/${userRole}/${roleId}`);
       // alert("User deleted successfully");
-      setSuccess("User Delected Successfully");
+      setSuccess(req.data.message);
       fetchUsers();
     } catch (err) {
       setErrors(err.response?.data?.error || "Failed to delete user");
