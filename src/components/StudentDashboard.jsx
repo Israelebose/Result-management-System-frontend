@@ -293,7 +293,7 @@ const StudentDashboard = () => {
   const adminQl = [
     {
       icon: FileText,
-      color: "teal",
+      color: "green",
       label: "View Results",
       path: "/home/view-result",
     },

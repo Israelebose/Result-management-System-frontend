@@ -5,8 +5,6 @@ import StudentDashboard from "./StudentDashboard";
 import StaffDashboard from "./StaffDashboard";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const api = useApi();
   const { userData } = useDetails();
 
 

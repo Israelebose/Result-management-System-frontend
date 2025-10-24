@@ -34,7 +34,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   if (loading) return <div>Loading...</div>;
 
   if (!user) {
-    console.log("ProtectedRoute: No user found");
+    setErrors("ProtectedRoute: No user found");
     return <Navigate to="/login" replace />;
   }
 

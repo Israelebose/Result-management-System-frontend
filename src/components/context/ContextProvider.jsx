@@ -105,7 +105,7 @@ export function ContextProvider({ children }) {
       if (!tokenData) {
         setErrors("Invalid token structure");
         return false;
-        return <Navigate to="/login" replace />;
+        
       }
 
       setUserData(tokenData);
