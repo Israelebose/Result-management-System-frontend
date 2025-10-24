@@ -23,8 +23,8 @@ export function useTheme() {
 // USER DETAILS CONTEXT
 // =======================
 const tokenContext = createContext({
-  userData : "",
-  adminId   : "000000",
+  userData: "",
+  adminId: "000000",
   fetchUser: () => {},
   toggleMobileSidebar: () => {},
   isMobileOpen: false,
@@ -68,8 +68,8 @@ export function ContextProvider({ children }) {
   // ---------------------
   // USER STATE
   // ---------------------
-  const [userData, setUserData] = useState({})
-  const adminId  = ''
+  const [userData, setUserData] = useState({});
+  const adminId = "";
 
   // Notification states
   const [error, setErrors] = useState("");
@@ -80,9 +80,8 @@ export function ContextProvider({ children }) {
   // AXIOS INSTANCE
   // ---------------------
   const axiosRequest = axios.create({
-    baseURL: "/api",
-    // baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true, // important for cookies
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   });
 
@@ -103,17 +102,15 @@ export function ContextProvider({ children }) {
     try {
       const res = await axiosRequest.get("/auth/profile"); // backend reads cookie
       const tokenData = res.data;
-      if(!tokenData){
-         setErrors("Invalid token structure");
+      if (!tokenData) {
+        setErrors("Invalid token structure");
         return false;
         return <Navigate to="/login" replace />;
       }
 
-      setUserData(tokenData)
-      
-      
+      setUserData(tokenData);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       setErrors("Authentication error");
       return false;
     }
