@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useApi } from "../context/ContextProvider";
+import { useApi, useDetails } from "../context/ContextProvider";
 
 const gradeToPoint = (grade) => {
   // base mapping: A=5, B=4, C=3, D=2, F=0
@@ -22,8 +22,15 @@ const CaResultManagement = () => {
   const [coursesSecond, setCoursesSecond] = useState([]);
   const [loading, setLoading] = useState(false);
   const api = useApi();
+  const {userData} = useDetails()
+  
 
   useEffect(() => {
+    if (!userData.role || userData.role !== "course_adviser") {
+      setErrors("Unauthorized. Please log in again.");
+      navigate("/login");
+      return;
+    }
     const fetchSessions = async () => {
       try {
         const res = await api.get("/get/adviser/sessions");

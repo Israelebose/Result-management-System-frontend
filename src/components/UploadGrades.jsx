@@ -14,6 +14,11 @@ const UploadGrades = () => {
 
   // Fetch courses assigned to this lecturer
   useEffect(() => {
+    if (!userData.role || !userData.is_staff ) {
+      setErrors("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
     const fetchCourses = async () => {
       try {
         const res = await api.get(`/get/lecturer-courses`);

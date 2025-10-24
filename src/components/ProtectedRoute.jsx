@@ -1,12 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useApi, useDetails } from "./context/ContextProvider";
-import { LogOut, Menu } from "lucide-react";
 import Sidebar from "./global/Sidebar";
 import ModeToggle from "./ModeToggle";
 import { allowedPaths } from "./";
 import HeaderCheck from "./global/HeaderCheck";
-import NotifyModel from "./global/NotifyModel";
+
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
   const { role, toggleMobileSidebar, setErrors, setSuccess } = useDetails();

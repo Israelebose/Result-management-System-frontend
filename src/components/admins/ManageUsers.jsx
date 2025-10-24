@@ -41,7 +41,7 @@ const ManageUsers = () => {
   }, [handleClickOutside]);
 
   useEffect(() => {
-    if (!userData.role || (userData.role !== "admin" && userData.role !== "super_admin")) {
+    if (!userData.role || (userData.role !== "admin" )) {
       setErrors("Session expired. Please log in again.");
       navigate("/login");
       return;

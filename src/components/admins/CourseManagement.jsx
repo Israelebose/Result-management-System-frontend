@@ -35,6 +35,11 @@ const CourseManagement = () => {
 
   // Fetch courses when component mounts
   useEffect(() => {
+     if (!userData.role || (userData.role !== "admin" )) {
+      setErrors("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
     fetchCourses();
   }, []);
 

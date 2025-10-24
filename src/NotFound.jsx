@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const NotFound = () => {
+  useEffect(()=>{
+    if (!userData.role) {
+      setErrors("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+  }, [])
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="text-center">

@@ -56,6 +56,17 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const api = useApi();
 
+  useEffect(() => {
+        // role check — if you don't want to force redirect in local dev, comment out
+        if (userData.role && userData.role !== "student") {
+          setErrors && setErrors("Unauthorized. Please log in again.");
+          navigate("/login");
+          return;
+        }
+       
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
   // Dummy user/profile fallback (if API not wired)
   const dummyProfile = {
     firstName: "John",

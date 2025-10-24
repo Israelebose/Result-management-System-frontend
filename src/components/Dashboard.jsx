@@ -7,7 +7,11 @@ import StaffDashboard from "./StaffDashboard";
 const Dashboard = () => {
   const { userData } = useDetails();
 
-
+if (!userData.role) {
+      setErrors("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
   return (
     <div className="">
       {userData.role === "student" ? <StudentDashboard /> : <StaffDashboard />}
