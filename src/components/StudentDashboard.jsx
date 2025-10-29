@@ -163,7 +163,7 @@ const StudentDashboard = () => {
       navigate("/login");
       return;
     }
-    fetchAnnouncements();
+    // fetchAnnouncements();
     setProfile(userData);
     fetchCoursesByLevel(userData.level);
     // eslint-disable-next-line react-hooks/exhaustive-deps

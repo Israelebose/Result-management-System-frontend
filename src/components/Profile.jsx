@@ -55,7 +55,6 @@ const Profile = () => {
     //   fetchEnrolledCourses();
     //   fetchAttendance();
     // } else if (['admin', 'course_adviser', 'lecturer'].includes(role)) {
-    //   fetchAssignedCourses();
     // }
   }, [userData.role, navigate]);
 

@@ -71,6 +71,7 @@ const StaffDashboard = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [coursesByLevel, setCoursesByLevel] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [selectedRole, setSelectedRole] = useState("student");
   const [dateRange, setDateRange] = useState("6m");
   const navigate = useNavigate();
@@ -89,8 +90,21 @@ const StaffDashboard = () => {
       ? (fetchCaStats(courseAdviserLevel),
         fetchCoursesByLevel(courseAdviserLevel))
       : null;
-    fetchAnnouncements();
+    fetchAssignedCourses();
   }, [userData.role, navigate]);
+
+  const fetchAssignedCourses = async () => {
+    try {
+      const res = await api.get(`/get/my-courses`, {});
+
+      setCourses(res.data.courses);
+      console.log(courses);
+    } catch (err) {
+      setErrors(
+        err.response?.data?.error || "Failed to fetch assigned courses"
+      );
+    }
+  };
 
   const fetchAdminStats = async () => {
     try {
@@ -352,6 +366,48 @@ const StaffDashboard = () => {
         {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
           <Bar data={chartData} options={chartOptions} />
         </div> */}
+
+        {userData.role === "lecturer" && (
+          <div>
+            {["admin", "course_adviser", "lecturer"].includes(
+              userData.role
+            ) && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl mb-10 shadow-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                  Assigned Courses
+                </h3>
+                {courses.length > 0 ? (
+                  <div className="space-y-4">
+                    {courses.map((course) => (
+                      <div
+                        key={course.courseCode}
+                        className="p-4 border-b border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition space-y-1.5"
+                      >
+                        <p className="text-gray-700 dark:text-gray-300">
+                          {course.courseCode} - {course.courseTitle}
+                        </p>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          Credit - {course.credits}{" "}
+                        </p>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          semester -{" "}
+                          {course.semester === 1 ? "first" : "second"}{" "}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Role: Instructor
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No courses assigned.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Quick Links (role specific) */}

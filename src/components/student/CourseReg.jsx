@@ -504,6 +504,7 @@ const CourseReg = () => {
 
   return (
     <div className="min-h-screen ">
+    {userData.is_approved ? (
       <div className=" mx-auto ">
         {/* Button UI for Print and Download */}
         <div className="flex justify-between flex-col mt-5 sm:mt-10 md:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 w-full">
@@ -771,6 +772,11 @@ const CourseReg = () => {
           </button>
         </form>
       </div>
+    ) : ( <div className="flex flex-col items-center pt-10 min-h-screen">
+          <h2 className="text-2xl font-semibold mb-2">
+            Account Pending Approval
+          </h2>
+        </div>)}
     </div>
   );
 };
